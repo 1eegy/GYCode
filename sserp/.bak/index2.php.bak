@@ -1,0 +1,108 @@
+<!DOCTYPE html >
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link type="text/css" rel="styleSheet"  href="view/css/a.css" />
+<title>GY_file</title>
+</head>
+<?php
+	include('include/db.php'); 
+?>
+		<body style="text-align:center" class="body">
+			<table align="center" width="500px">
+				<tr>
+					<th>
+							上传操作
+					</th>
+				</tr>
+				<form action="include/sserp.php" method="post" enctype="multipart/form-data" name="upload_form">
+					<tr>
+						<td>
+							<label>选择图片文件</label>
+							<input name="imgfile" type="file" accept="image/gif, image/jpeg"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input name="imgname" placeholder="自定义文件名/可留空" type="text"/>
+							<?php include('include/addtags.php'); ?>
+							<input name="uploads" type="submit" value="上传" />
+						</td>
+					</tr>
+				</form>
+			</table>
+			<table align="center" width="500px">
+				<tr>
+					<th>靠TAG来搜索</th>
+					<th>靠名称来搜索</th>
+					<th>管理TAG</th>
+				</tr>
+				<tr>
+					<td>
+					<form action="" method="post">
+						<?php include('include/tags.php'); ?>
+
+						<input name="searched" type="submit" value="搜索" />
+					</form>
+					</td>
+					<td>
+					<form action="include/namesearch.php" method="post">
+						<input name="nsearched" type="text" placeholder="输入关键字即可" />
+						<input name="search" type="submit" value="搜索" />
+					</form>
+					</td>
+					<td>
+						<a href="include/managetags.php">进入界面</a>
+					</td>
+				</tr>
+			</table>
+			<br/>
+		</body>
+		<?php if (isset($_POST['searchname'])){ ?>
+			<div style="text-align:center">
+				<a href="http://file.diolee.top"><h2>返回🔙</h2></a><br/>
+			</div>
+			<body style="text-align:center">
+			<?php
+				$search = $_POST['searchname'];
+				$sql = "select * from sserp_path where img_tag = '$search' order by createtime desc";
+				$res = $conn->query($sql);
+				while($row = $res->fetch()){
+					echo "图片:"."<img src='../".$row['img_path']."' width=20%/>"."<br />";
+				}
+			}
+		?>
+	<?php
+	echo "<h2 style='text-align:center'>显示最后10张上传图片:"."</h2><br/>";
+	$sql = "select * from sserp_path order by createtime desc limit 10;";
+	$res = $conn->query($sql);
+	while($row = $res->fetch()){
+		@$i += 1;
+		//echo "<div style='text-align:center'>图片".$i.":<img src='".$row['img_path']."' width=20% />"."</div>";
+		//echo $row['img_path'];
+		//echo "<a href='".$row['img_path']."'></a>";
+		echo '图片'.$i.':';
+		?>
+		<div style='text-align:center;'>
+		<a href="<?php echo $row['img_path']; ?>">
+			<?php echo "'<img src='".$row['img_path']."' width=20% />"; ?>
+		</a><br/>
+		<?php echo $row['img_name'];  ?>
+		</div>
+		<form id="form1" name="form1" method="post" action="">
+			<input name="" type="submit" value="删除" />
+			<input name="<?php echo $i ?>" type="hidden" id="a" value="a" />
+		</form>
+		<?php
+		@$a=$_REQUEST[$i];
+		if ($a=="a")
+		{
+			unlink("include/".$row['img_path']);
+			$sql = "delete from sserp_path where img_path = '$row[img_path]'";
+			$res = $conn->query($sql);
+			echo "<meta http-equiv='refresh' content='0.1;URL=http://file.diolee.top'/>";
+		}
+	}
+	$conn = null;
+?>
+</html>
